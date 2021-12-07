@@ -1,0 +1,12 @@
+// This KQL query uses Azure diagnostic settings of SQL databases (with auditing and application firewall enabled) to check what IPs connected to databases, if they are private, public
+// or from instance from a Azure service such as DevOps here, and if the connection succeeded along with the number of occurence
+
+AzureDiagnostics
+| where Category == 'SQLSecurityAuditEvents'
+| where action_id_s in ('DBAF','DBAS','RPC')
+// where succeeded_s == "true"
+// | and LogicalServerName_s == 'sqlauditserver'
+| extend isDevOpsIP = ipv4_is_in_range(client_ip_s, '40.74.28.0/23')
+| extend isPrivateIP = ((client_ip_s == 'Internal') or (ipv4_is_private(client_ip_s)))
+| summarize count() by client_ip_s, isDevOpsIP, isPrivateIP, isPublicIP = not(isPrivateIP), LogicalServerName_s, succeeded_s
+| project LogicalServerName_s,SourceIP = client_ip_s, isPrivateIP, isDevOpsIP = iff(isempty(isDevOpsIP),"false",tostring(isDevOpsIP)), isPublicIP, Occurences = count_, Succeeded = succeeded_s
