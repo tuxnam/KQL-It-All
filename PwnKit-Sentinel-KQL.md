@@ -44,6 +44,7 @@ Syslog
   | project TimeGenerated, EventType, Computer, EventData 
   | parse EventData with * "syscall=" syscall " syscall_r=" * " success=" success " exit=" exit " a0" * " ppid=" ppid " pid=" pid " audit_user=" audit_user " auid=" auid " user=" user " uid=" uid " group=" group " gid=" gid "effective_user=" effective_user " euid=" euid " set_user=" set_user " suid=" suid " filesystem_user=" filesystem_user " fsuid=" fsuid " effective_group=" effective_group " egid=" egid " set_group=" set_group " sgid=" sgid " filesystem_group=" filesystem_group " fsgid=" fsgid " tty=" tty " ses=" ses " comm=\"" comm "\" exe=\"" exe "\"" * "cwd=\"" cwd "\"" * "name=\"" name "\"" * "cmdline=\"" cmdline "\" containerid=" containerid
   // Find pkexec usage or exploit IoCs
+  // You can potientially remove some false positives by limiting to non-roit users:
   //| where uid != 0 and gid != 0
   | where cmdline contains "pkexec" or cmdline contains ("PKEXEC") or comm in ("pkexec","PKEXEC") or EventData contains "The value for SHELL variable" or comm contains "GCONV_PATH"
   | project TimeGenerated, Computer, audit_user, user, cmdline, comm, EventData
