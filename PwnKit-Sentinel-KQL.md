@@ -15,7 +15,7 @@ The exploit exists and can easily be found on the Internet. The idea here is to 
 
 Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
 However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
-Indeed, by default the exec has the SETUID bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.  
+Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.  
 The SETUID (4755) bit is set (or even the setuid + SETGID bits: 6755). If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
 This means pkexec will probably not work at all anymore, so it might have adverse impact if it used by *legitimate* operators, however this is rarely used as such. And ok, there are priorities to be made here right?
 
