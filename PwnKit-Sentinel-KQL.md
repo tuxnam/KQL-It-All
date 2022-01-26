@@ -15,16 +15,17 @@ The exploit exists and can easily be found on the Internet. The idea here is to 
 
 Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
 However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
-Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.  
-The SETUID (4755) bit is set (or even the setuid + SETGID bits: 6755). If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
+Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.
+In most distributions, SETUID (4755) bit is set on pkexec (or even the setuid + SETGID bits: 6755).<br />
+If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
 This means pkexec will probably not work at all anymore, so it might have adverse impact if it used by *legitimate* operators, however this is rarely used as such. And ok, there are priorities to be made here right?
 
 ### How to threat hunt for this using Sentinel?
 
-**Note:** most modern EDR and vulnerability scanning solutions should be able to at least detect your system as being vulnerable. 
+**Note:** most modern EDR and vulnerability scanning solutions (Qualys, TVM on MDE...) should be able to at least detect your system as being vulnerable. 
 
 If you send audit logs to Sentinel, using syslog, the default connecotr for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know). 
-Details of successfull or unsucessfull *pkexec* commands will be located in *auth.log*, example:
+Details of successfull or unsucessfull *pkexec* commands can for instance be found in *auth.log*, example (here a failed attempt):
 
 ```
 *./auth.log:Jan 26 20:08:30 XXXX-Server polkitd(authority=local): Registered Authentication Agent for unix-process:4885:58817 (system bus name :1.31 [pkexec ls], object
@@ -33,7 +34,9 @@ Details of successfull or unsucessfull *pkexec* commands will be located in *aut
 OMMAND=/usr/bin/ls]*
 ```
 
-This is very straightforward query. This is not bullet-proof and will probably not detect all exploits out there, as well as bringing some false-positives but this is a good start:
+This is very straightforward query. This is certainly not bullet-proof and will probably not detect all exploits out there, as well as bringing some false-positives but this is a good start.
+I suggest to use it as hunting query in Sentinel, adapt it to your needs or own investigations.
+Microsoft MSTIC team or other security researchers will probably release more complete IoCs and detection rules in coming days.
 
 ```
 Syslog
@@ -43,7 +46,6 @@ Syslog
   // Find pkexec usage or exploit IoCs
   //| where uid != 0 and gid != 0
   | where cmdline contains "pkexec" or cmdline contains ("PKEXEC") or comm in ("pkexec","PKEXEC") or EventData contains "The value for SHELL variable" or comm contains "GCONV_PATH"
-  // Find command lines featuring known crypto currency miner names
   | project TimeGenerated, Computer, audit_user, user, cmdline, comm, EventData
   | extend AccountCustomEntity = user, HostCustomEntity = Computer, timestamp = TimeGenerated
   | sort by TimeGenerated desc
@@ -51,13 +53,17 @@ Syslog
 
 ### Wait...if he gained root, the attacker can simply delete the auth.log file, journal file and all the other log files?
 
-Indeed! this is why you should make sure that auditd is properly set in all your Linux hosts. Root is supposed to be trusted, this can lead to some security operations headaches with privilege escalations. Anyway, deleting logs on its own is something you should already detect on Sentinel or with your EDR solution, as this already means something bad is going on. <br />
-You could still look for bash history or similar files, but these will probably also be cleared by a cleever attacker. 
-You could also detect all changes to files in latest 120 minutes, using find command for instance, including logs deletion. But an attacker can also bypass this, quite easily. Conclusion being, always send your log to an external system, and make sure auditd is properly configured.
-You also have other mitigations in place such as leveraging SELinux.
+Indeed! this is why you should make sure that *auditd* is properly configured in all your Linux hosts. Root is supposed to be trusted, this can lead to some security operations headaches with privilege escalations. 
+Anyway, deleting logs on its own is something you should already detect on Sentinel or with your EDR solution, as this already means something bad is going on. <br />
+You could still look for bash history or similar files, but these will probably also be cleared by a clever attacker. 
+You could also detect all changes to files in latest 120 minutes, using find command for instance, including logs deletion. 
+But an attacker can also bypass this, quite easily by messing up with timestamping. 
+Conclusion being, always send your log to an external system, and make sure auditd is properly configured.
+
+You can also have other mitigations in place such as leveraging SELinux.
 <br />
 <br />
-If auditd is not set properly in your environment, then the only alternative to detect such log deletion is more advanced forensics commands and tools, but this is not the idea to cover this here.
+If none of the above helps in your case, and logging is not set properly in your environment, then the only alternative to detect such log deletion is more advanced forensics commands and tools, but this is not the idea to cover this here.
 
 ### A note on CVE-2022-0185: Kubescape vulnerability
 
