@@ -24,7 +24,7 @@ This means pkexec will probably not work at all anymore, so it might have advers
 
 **Note:** most modern EDR and vulnerability scanning solutions (Qualys, TVM on MDE...) should be able to at least detect your system as being vulnerable. 
 
-If you send audit logs to Sentinel, using syslog, the default connecotr for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know). 
+If you send audit logs to Sentinel, using syslog, the default connector for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know). 
 Details of successfull or unsucessfull *pkexec* commands can for instance be found in *auth.log*, example (here a failed attempt):
 
 ```
