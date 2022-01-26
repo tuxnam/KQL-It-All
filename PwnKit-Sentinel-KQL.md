@@ -73,7 +73,7 @@ Most container runtime protection tools would detect and alert on the usage of t
 However, the above CVE, pwnkit, combined with this kubescape vulnerability allows to completely compromise a full Kubernetes cluster, so be vigilent. 
 
 Defender for containers for instance would spot such runtime security issue. By the way, it would also spot deletion of command history file on your host.
-All alerts which can be raised by Defender for containers can be found (here)[https://docs.microsoft.com/en-us/azure/defender-for-cloud/alerts-reference#alerts-k8scluster). Full details on the product, [here](https://docs.microsoft.com/en-us/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks]. <br />
+All alerts which can be raised by Defender for containers can be found [here](https://docs.microsoft.com/en-us/azure/defender-for-cloud/alerts-reference#alerts-k8scluster). Full details on the product, [here](https://docs.microsoft.com/en-us/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks). <br />
 Similarly in your CI/CD pipeline you should use DockerBench, Claire, Trivy or other similar tools to detect bad practices in container images or Kubernetes yaml deployment files. 
 
 
