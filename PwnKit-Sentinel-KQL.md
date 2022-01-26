@@ -7,7 +7,7 @@ This is not a *new* vulnerability, CVE registation dates back from late 2021 and
 On 26th of January, Qualys researchers disclosed how it could lead to local Privilege Escalation, from any user to root. This is exploiting a vulnerability in *pkexec* command, from polkit, a SUID-root program allowing to run any program as another user, or root if no user is specificied (see [manual pages](https://linux.die.net/man/1/pkexec)).
 The problem is that polkit is installed by default on every major Linux distribution.
 
-### Is there an exploit availabe and how hard is it to exploit?
+### Is there an exploit availalbe and how hard is it to exploit?
 
 The exploit exists and can easily be found on the Internet. The idea here is to keep responsible disclosure in mind and not put any source. You can however consider any script kiddy out there will be able to (1) find it, (2) execute it as long as they have regular user access to a vulnerable OS.
 
