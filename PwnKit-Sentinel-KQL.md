@@ -3,19 +3,20 @@
 ### Details on the CVE-2021-4034
 
 All details about this vulnerability can be found here: https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt
-This is not a *new* vulnerability, this dates back from late 2021 and a patch is available.
-However, on 26th of January, Qualys researchers disclosed how it could lead to local Privilege Escalation, from any user to root, by exploiting a vulnerability in *pkexec* command, from polkit, a SUID-root program allowing to run any program as another user, or root if no user is specificied (see [manual pages](https://linux.die.net/man/1/pkexec)).
-The problem is that this polkit is installed by default on every major Linux distribution.
+This is not a *new* vulnerability, CVE registation dates back from late 2021 and the actual bug is 12 years old! A patch is available for most standard distributions. <br />
+On 26th of January, Qualys researchers disclosed how it could lead to local Privilege Escalation, from any user to root, exploiting a vulnerability in *pkexec* command, from polkit, a SUID-root program allowing to run any program as another user, or root if no user is specificied (see [manual pages](https://linux.die.net/man/1/pkexec)).
+The problem is that polkit is installed by default on every major Linux distribution.
 
-**Is there an exploit availabe and how hard is it to exploit?**
+### Is there an exploit availabe and how hard is it to exploit?
 
 The exploit exists and can easily be found on the Internet. The idea here is to keep responsible disclosure in mind and not put any source. You can however consider any script kiddy out there will be able to (1) find it, (2) execute it as long as they have regular user access to a vulnerable OS.
 
-**Is there a fix available?**
+### Is there a fix available?**
 
-Yes a patch already exists for this CVE and is the best and recommended solution.
-However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.
-Indeed, by default the exec has the SETUID bit set, which allows this privilege escalation to happen. The SETUID (4755) bit is set (or even the setuid + SETGID bits: 6755). If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
+Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
+However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
+Indeed, by default the exec has the SETUID bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.  
+The SETUID (4755) bit is set (or even the setuid + SETGID bits: 6755). If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
 This means pkexec will probably not work at all anymore, so it might have adverse impact if it used by *legitimate* operators, however this is rarely used as such. And ok, there are priorities to be made here right?
 
 ### How to threat hunt for this using Sentinel?
@@ -48,7 +49,7 @@ Syslog
   | sort by TimeGenerated desc
 ```
 
-**Wait...if he gained root, the attacker can simply delete the auth.log file, journal file and all the other log files?**
+### Wait...if he gained root, the attacker can simply delete the auth.log file, journal file and all the other log files?
 
 Indeed! this is why you should make sure that auditd is properly set in all your Linux hosts. Root is supposed to be trusted, this can lead to some security operations headaches with privilege escalations. Anyway, deleting logs on its own is something you should already detect on Sentinel or with your EDR solution, as this already means something bad is going on. <br />
 You could still look for bash history or similar files, but these will probably also be cleared by a cleever attacker. 
@@ -58,7 +59,7 @@ You also have other mitigations in place such as leveraging SELinux.
 <br />
 If auditd is not set properly in your environment, then the only alternative to detect such log deletion is more advanced forensics commands and tools, but this is not the idea to cover this here.
 
-## A note on CVE-2022-0185: Kubescape vulnerability
+### A note on CVE-2022-0185: Kubescape vulnerability
 
 Recently another critical vulnerability was disclosed, in Kubernetes environments. This vulnerability basically exploits a capability (basically giving more privileges to a container than what they normally should have), CAP_SYS_ADMIN, to gain node access on a Kubernetes cluster. It also allows to exploit a container in a different namespace. 
 Most container runtime protection tools would detect and alert on the usage of this capability and this should be part of your best-practices to drop all capabilities in your container environments. <br />
