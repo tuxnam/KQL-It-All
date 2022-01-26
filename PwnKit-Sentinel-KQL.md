@@ -15,7 +15,7 @@ The exploit exists and can easily be found on the Internet. The idea here is to 
 
 Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
 However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
-Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. Indeed SETUID allows to basically execute a program with the owner's privileges.
+Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. SETUID bit allows to execute a program with the owner's privileges.
 In most distributions, SETUID (4755) bit is set on pkexec (or even the setuid + SETGID bits: 6755).<br />
 If you change the permissions using for instance chmod 0755 (chmod a+rwx,g-w,o-w,ug-s,-t), it would set permissions so that, (U)ser / owner can read, can write and can execute. (G)roup can read, can't write and can execute. (O)thers can read, can't write and can execute, and SETUID bit is not set anymore on the binary. 
 This means pkexec will probably not work at all anymore, so it might have adverse impact if it used by *legitimate* operators, however this is rarely used as such. And ok, there are priorities to be made here right?
@@ -69,7 +69,7 @@ If none of the above helps in your case, and logging is not set properly in your
 ### A note on CVE-2022-0185: Kubescape vulnerability
 
 Recently another critical vulnerability was disclosed, in Kubernetes environments. This vulnerability basically exploits a capability (basically giving more privileges to a container than what they normally should have), CAP_SYS_ADMIN, to gain node access on a Kubernetes cluster. It also allows to exploit a container in a different namespace. 
-Most container runtime protection tools would detect and alert on the usage of this capability and this should be part of your best-practices to drop all capabilities in your container environments. <br />
+Most container runtime protection tools would detect and alert on the usage of this capability and this should be part of your best-practices to drop all capabilities in your container environments and leverage *seccomp* profiles.<br />
 However, the above CVE, pwnkit, combined with this kubescape vulnerability allows to completely compromise a full Kubernetes cluster, so be vigilent. 
 
 Defender for containers for instance would spot such runtime security issue. By the way, it would also spot deletion of command history file on your host.
