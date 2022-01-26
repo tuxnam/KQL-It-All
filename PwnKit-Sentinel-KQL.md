@@ -4,7 +4,7 @@
 
 All details about this vulnerability can be found here: https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt
 This is not a *new* vulnerability, CVE registation dates back from late 2021 and the actual bug is 12 years old! A patch is available for most standard distributions. <br />
-On 26th of January, Qualys researchers disclosed how it could lead to local Privilege Escalation, from any user to root, exploiting a vulnerability in *pkexec* command, from polkit, a SUID-root program allowing to run any program as another user, or root if no user is specificied (see [manual pages](https://linux.die.net/man/1/pkexec)).
+On 26th of January, Qualys researchers disclosed how it could lead to local Privilege Escalation, from any user to root. This is exploiting a vulnerability in *pkexec* command, from polkit, a SUID-root program allowing to run any program as another user, or root if no user is specificied (see [manual pages](https://linux.die.net/man/1/pkexec)).
 The problem is that polkit is installed by default on every major Linux distribution.
 
 ### Is there an exploit availabe and how hard is it to exploit?
