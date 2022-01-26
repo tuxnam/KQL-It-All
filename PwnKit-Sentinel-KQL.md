@@ -13,7 +13,7 @@ The exploit exists and can easily be found on the Internet. The idea here is to 
 
 ### Is there a fix available?
 
-Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
+Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution. Pkexec >= 0.120 is considered patched.
 However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
 Indeed, by default the pkexec binary has the *SETUID* bit set, which allows this privilege escalation to happen. SETUID bit allows to execute a program with the owner's privileges.
 In most distributions, SETUID (4755) bit is set on pkexec (or even the setuid + SETGID bits: 6755).<br />
