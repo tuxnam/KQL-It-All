@@ -25,16 +25,16 @@ This means pkexec will probably not work at all anymore, so it might have advers
 If you send audit logs to Sentinel, using syslog, the default connecotr for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know). 
 Details of successfull or unsucessfull *pkexec* commands will be located in *auth.log*, example:
 
-'''
+```
 *./auth.log:Jan 26 20:08:30 XXXX-Server polkitd(authority=local): Registered Authentication Agent for unix-process:4885:58817 (system bus name :1.31 [pkexec ls], object
  path /org/freedesktop/PolicyKit1/AuthenticationAgent, locale en_US.UTF-8)
 ./auth.log:Jan 26 20:08:36 XXXX-Server pkexec[4981]: tux: Error executing command as another user: Not authorized [USER=root] [TTY=/dev/pts/0] [CWD=/home/azureuser] [C
 OMMAND=/usr/bin/ls]*
-'''
+```
 
 This is very straightforward query. This is not bullet-proof and will probably not detect all exploits out there but this is a good start:
 
-'''
+```
 Syslog
   | parse SyslogMessage with "type=" EventType " audit(" * "): " EventData
   | project TimeGenerated, EventType, Computer, EventData 
@@ -48,7 +48,7 @@ Syslog
   | project TimeGenerated, Computer, audit_user, user, cmdline
   | extend AccountCustomEntity = user, HostCustomEntity = Computer, timestamp = TimeGenerated
   | sort by TimeGenerated desc
-'''
+```
 
 **Wait...if he gained root, the attacker can simply delete the auth.log file, journal file and all the other log files?**
 
