@@ -11,7 +11,7 @@ The problem is that polkit is installed by default on every major Linux distribu
 
 The exploit exists and can easily be found on the Internet. The idea here is to keep responsible disclosure in mind and not put any source. You can however consider any script kiddy out there will be able to (1) find it, (2) execute it as long as they have regular user access to a vulnerable OS.
 
-### Is there a fix available?**
+### Is there a fix available?
 
 Yes a patch already exists for this CVE for most standard OS'es but not all of them. Patching is the best and recommended solution.
 However a temporary mitigation exists, which at time of writing, seems to work: changing the permissions on the vulnerable binary, *pkexec*.<br />
