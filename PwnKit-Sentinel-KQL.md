@@ -32,20 +32,18 @@ Details of successfull or unsucessfull *pkexec* commands will be located in *aut
 OMMAND=/usr/bin/ls]*
 ```
 
-This is very straightforward query. This is not bullet-proof and will probably not detect all exploits out there but this is a good start:
+This is very straightforward query. This is not bullet-proof and will probably not detect all exploits out there, as well as bringing some false-positives but this is a good start:
 
 ```
 Syslog
   | parse SyslogMessage with "type=" EventType " audit(" * "): " EventData
   | project TimeGenerated, EventType, Computer, EventData 
-  // Extract AUOMS_EXECVE details from EventData
-  | where EventType =~ "AUOMS_EXECVE"
   | parse EventData with * "syscall=" syscall " syscall_r=" * " success=" success " exit=" exit " a0" * " ppid=" ppid " pid=" pid " audit_user=" audit_user " auid=" auid " user=" user " uid=" uid " group=" group " gid=" gid "effective_user=" effective_user " euid=" euid " set_user=" set_user " suid=" suid " filesystem_user=" filesystem_user " fsuid=" fsuid " effective_group=" effective_group " egid=" egid " set_group=" set_group " sgid=" sgid " filesystem_group=" filesystem_group " fsgid=" fsgid " tty=" tty " ses=" ses " comm=\"" comm "\" exe=\"" exe "\"" * "cwd=\"" cwd "\"" * "name=\"" name "\"" * "cmdline=\"" cmdline "\" containerid=" containerid
-  // Find pkexec usage
+  // Find pkexec usage or exploit IoCs
   //| where uid != 0 and gid != 0
-  | where cmdline contains "pkexec" or cmdline contains ("PKEXEC") or comm in ("pkexec","PKEXEC")
+  | where cmdline contains "pkexec" or cmdline contains ("PKEXEC") or comm in ("pkexec","PKEXEC") or EventData contains "The value for SHELL variable" or comm contains "GCONV_PATH"
   // Find command lines featuring known crypto currency miner names
-  | project TimeGenerated, Computer, audit_user, user, cmdline
+  | project TimeGenerated, Computer, audit_user, user, cmdline, comm, EventData
   | extend AccountCustomEntity = user, HostCustomEntity = Computer, timestamp = TimeGenerated
   | sort by TimeGenerated desc
 ```
