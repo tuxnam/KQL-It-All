@@ -25,7 +25,7 @@ This means pkexec will probably not work at all anymore, so it might have advers
 **Note:** most modern EDR and vulnerability scanning solutions (Qualys, TVM on MDE...) should be able to at least detect your system as being vulnerable. 
 
 If you send audit logs to Sentinel, using syslog, the default connector for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know). 
-Details of successfull or unsucessfull *pkexec* commands can beyond other log files be found in *auth.log*, example (here a failed attempt):
+Details of successfull or unsucessfull *pkexec* commands can beyond other log files be found in *auth.log*, *authpriv.log* or *secure.log* depending oin your system, example (here a failed attempt) on Ubuntu:
 
 ```
 *./auth.log:Jan 26 20:08:30 XXXX-Server polkitd(authority=local): Registered Authentication Agent for unix-process:4885:58817 (system bus name :1.31 [pkexec ls], object
@@ -34,13 +34,28 @@ Details of successfull or unsucessfull *pkexec* commands can beyond other log fi
 OMMAND=/usr/bin/ls]*
 ```
 
-Now, here is an example of a successful straightforward exploit. Again, this is pretty easy. There are several exploits out there, some only working on specific releases.
+Now, here is an example of a successful straightforward exploit on CentOS. Again, this is pretty easy. There are several exploits out there, some only working on specific releases.
 
 <img src=images/success_exploit.png />
+
+After successful exploit (or unsuccessful) in CentOS, *secure* log file (=authpriv syslog facility) is populated as such:
+
+![image](https://user-images.githubusercontent.com/18376283/151335767-9b86699d-f3db-44f9-9330-cb31b3cd604f.png)
+
+Note, in your Sentinel configuration for SYslog, make sure you collect all needed facilities:
 
 The query I used for Sentinel is a very straightforward/basic one. This is certainly not bullet-proof and will probably not detect all exploits out there, as well as bringing some false-positives but this is a good start.
 I suggest to use it as hunting query in Sentinel, adapt it to your needs or own investigations.
 Microsoft MSTIC team or other security researchers will probably release more complete IoCs and detection rules in coming days.
+The query is filtering on the *auth* and *authpriv* facilies in syslog, parsing and looking for IoCs explained here above. The first one is only working for CentOS or equivalent systems where both auth and authpriv are included as part of *secure* file in /var/log/, and assuming only a basic default syslog/auditd configuration:
+
+```
+Syslog
+| where Facility == "authpriv" or Facility == "auth"
+| where SyslogMessage contains "the SHELL variable " or SyslogMessage contains "GCONV_PATH"
+```
+
+The following query is parsing a bit more and working for Ubuntu or Debian-based systems for instance:
 
 ```
 Syslog
