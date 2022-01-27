@@ -55,7 +55,8 @@ The query is filtering on the either on *auth* and *authpriv* facilies in syslog
 
 ```
 Syslog
-| where Facility == "authpriv" or Facility == "auth"
+| where Facility == "authpriv" or Facility == "auth" or Facility == "user"
+| where ProcessName contains "pkexec"
 | where SyslogMessage contains "the SHELL variable " or SyslogMessage contains "GCONV_PATH"
 ```
 
