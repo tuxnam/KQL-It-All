@@ -34,6 +34,10 @@ Details of successfull or unsucessfull *pkexec* commands can beyond other log fi
 OMMAND=/usr/bin/ls]*
 ```
 
+Now, here is an example of a successful straightforward exploit. Again, this is pretty easy. There are several exploits out there, some only working on specific releases.
+
+<img src=images/success_exploit.png />
+
 The query I used for Sentinel is a very straightforward/basic one. This is certainly not bullet-proof and will probably not detect all exploits out there, as well as bringing some false-positives but this is a good start.
 I suggest to use it as hunting query in Sentinel, adapt it to your needs or own investigations.
 Microsoft MSTIC team or other security researchers will probably release more complete IoCs and detection rules in coming days.
