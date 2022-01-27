@@ -25,7 +25,7 @@ This means pkexec will probably not work at all anymore, so it might have advers
 **Note:** most modern EDR and vulnerability scanning solutions (Qualys, TVM on MDE...) should be able to at least detect your system as being vulnerable. 
 
 If you send audit logs to Sentinel, using syslog, the default connector for Linux logs in Sentinel, you can simply look for execution of the *pkexec* command by a non-root user (successful or not, in any case it is good to know) or in most cases, look for other IoCs such as *'GCONV_PATH'* and/or *'The value for SHELL variable'* which will output as result of executing the exploit. <br />
-Details of successfull or unsucessfull attempts will depends on syslog configuration and target os (there are subtle differences between for instance Ubuntu syslog facilities and CentOS). Most of the time, you can leverage beyond other logs, find interesting details in *auth.log*, *authpriv.log* or *secure.log* (for CentOS). 
+Details of successfull or unsucessfull attempts will depends on syslog configuration and target os (there are subtle differences between for instance Ubuntu syslog facilities and CentOS). Most of the time, you can leverage beyond other logs, details in *auth.log*, *authpriv.log* or *secure.log* (for CentOS). 
 Example (here a failed attempt) on Ubuntu auth.log:
 
 ```
