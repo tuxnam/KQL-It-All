@@ -75,6 +75,10 @@ Syslog
   | sort by TimeGenerated desc
 ```
 
+In summary, for syslog:
+- auth.log on Ubuntu and/or Debian will contain all authentication/authorization related events: as pkexec is actually executing commands as another user, most events will be logged here.
+- secure.log on RedHat or CentOS based systems, as they use this log file instead of /var/log/auth.log. 
+
 ### Wait...if he gained root, the attacker can simply delete the auth.log file, journal file and all the other log files?
 
 Indeed! this is why you should make sure that *auditd* is properly configured in all your Linux hosts. Root is supposed to be trusted, this can lead to some security operations headaches with privilege escalations. 
