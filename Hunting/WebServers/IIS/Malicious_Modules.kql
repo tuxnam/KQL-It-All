@@ -1,0 +1,49 @@
+// Description: Hunt for malicious modules in Microsoft IIS 
+// References:
+// https://www.microsoft.com/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/
+// https://www.crowdstrike.com/wp-content/uploads/2022/05/crowdstrike-iceapple-a-novel-internet-information-services-post-exploitation-framework-1.pdf
+// https://learn.microsoft.com/en-us/dotnet/framework/tools/gacutil-exe-gac-tool
+// Target tool(s): Microsoft 365 - Sentinel - Vary based on the queries
+
+// Look for Event Log Service Provider Microsoft-IIS-Configuration/Operational - Event ID 29 - ISS Module Installed 
+// Tool: Sentinel
+// Requirements: 
+// 1. Requires advanced IIS logging to be enabled): 
+// 2. Requires Windows Events to be sent to Sentinel 
+//
+// Event
+// | where EventLog == 'Microsoft-IIS-Configuration/Operational'
+// | where EventID == 29
+
+// Look for module being installed through usage of gacutil.exe or appcmd.exe add module within w3wp.exe context
+// Tool: Microsoft 365 
+// Requirements:
+// 1. Requires Defender to be installed on the IIS server
+// 
+// DeviceProcessEvents
+// | where ProcessCommandLine has "\\gacutil.exe /I" or ProcessCommandLine has "appcmd.exe add module"
+// | where InitiatingProcessParentFileName == "w3wp.exe"
+
+// Time-based correlation of modules (DLL) loads for IIS process w3wp.exe
+// Tool: Microsoft 365
+// Requirements:
+// 1. Requires Defender to be installed on the IIS server
+//
+// DeviceImageLoadEvents
+// | where InitiatingProcessFileName has "w3wp.exe" 
+// | summarize loaded_modules=make_set(FileName) by format_datetime(Timestamp, 'yy-MM-dd HH:mm:ss')
+// | project Timestamp, loaded_modules, count=array_length(loaded_modules)
+
+// Suspicious process creation by IIS's w3wp process 
+// Tool: Microsoft 365 
+// Requirements:
+// 1. Requires Defender to be installed on the IIS server
+//
+// DeviceProcessEvents
+// | where Timestamp > ago(7d)
+// | where InitiatingProcessFileName in~ ('w3wp.exe', 'httpd.exe')
+// | where FileName in~ (
+//    'cmd.exe','cscript.exe','powershell.exe','wscript.exe','net.exe','net1.exe','ping.exe','whoami.exe','rundll32.exe','wmic.exe'
+// )
+// | summarize instances = count() by ProcessCommandLine, FolderPath, DeviceName, DeviceId
+// | order by instances asc
